@@ -6,6 +6,9 @@ import (
 	"io"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/fatih/color"
+	"github.com/mattn/go-colorable"
 )
 
 type Token int
@@ -24,10 +27,11 @@ const (
 type State int
 
 type Scanner struct {
-	last  Token
-	curr  Token
-	scan  *bufio.Scanner
-	quote bool
+	last    Token
+	curr    Token
+	scan    *bufio.Scanner
+	quote   bool
+	comment bool
 }
 
 func (s *Scanner) classOf(r rune) Token {
@@ -60,11 +64,19 @@ func (s *Scanner) splitToken(data []byte, atEOF bool) (int, []byte, error) {
 		if i == 0 {
 			break
 		}
-		if len(b) > 2 && (r == '/' && b[1] == '*') || (r == '*' && b[1] == '/') {
+		if len(b) > 2 && ((r == '/' && b[1] == '*') || (r == '*' && b[1] == '/')) {
 			clazz = COMMENT
 			i++
 		} else {
 			clazz = s.classOf(r)
+		}
+
+		if s.comment {
+			if bpos == 0 && clazz == COMMENT {
+				s.comment = false
+			}
+		} else if clazz == COMMENT {
+			s.comment = true
 		}
 
 		if s.quote {
@@ -106,6 +118,10 @@ func (s *Scanner) Text() string {
 	return s.scan.Text()
 }
 
+func (s *Scanner) InComment() bool {
+	return s.comment
+}
+
 func (s *Scanner) Token() Token {
 	return s.curr
 }
@@ -118,8 +134,25 @@ func main() {
 	s := `
 	select * from foo where id = /*a*/'foo bar'
 	`
+
+	out := colorable.NewColorableStdout()
 	scan := NewScanner(strings.NewReader(s))
 	for scan.Scan() {
-		fmt.Printf("%v: %q\n", scan.Token(), scan.Text())
+		switch scan.Token() {
+		case COMMENT:
+			fmt.Fprint(out, color.BlueString(scan.Text()))
+		case OPERATOR:
+			fmt.Fprint(out, color.MagentaString(scan.Text()))
+		case TOKEN:
+			if scan.InComment() {
+				fmt.Fprint(out, color.YellowString(scan.Text()))
+			} else {
+				fmt.Fprint(out, color.GreenString(scan.Text()))
+			}
+		case QUOTE:
+			fmt.Fprint(out, color.RedString(scan.Text()))
+		default:
+			fmt.Fprint(out, color.WhiteString(scan.Text()))
+		}
 	}
 }
