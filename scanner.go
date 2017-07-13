@@ -21,10 +21,13 @@ const (
 	COMMENT
 )
 
+type State int
+
 type Scanner struct {
-	last Token
-	curr Token
-	s    *bufio.Scanner
+	last  Token
+	curr  Token
+	scan  *bufio.Scanner
+	quote bool
 }
 
 func (s *Scanner) classOf(r rune) Token {
@@ -43,29 +46,38 @@ func (s *Scanner) classOf(r rune) Token {
 	if r == '\'' {
 		return QUOTE
 	}
-	if r == '\'' {
-		return STRING
-	}
 	return ILLEGAL
 }
 
 func (s *Scanner) splitToken(data []byte, atEOF bool) (int, []byte, error) {
 	bpos := 0
 	b := data
-	if s.last == ILLEGAL {
-		s.curr = SPACE
-	} else {
-		s.curr = s.last
-	}
+	s.curr = s.last
+
+	var clazz Token
 	for {
 		r, i := utf8.DecodeRune(b)
 		if i == 0 {
 			break
 		}
-		clazz := s.classOf(r)
-		if s.last == ILLEGAL {
-			s.last = clazz
-		} else if clazz != s.last {
+		if len(b) > 2 && (r == '/' && b[1] == '*') || (r == '*' && b[1] == '/') {
+			clazz = COMMENT
+			i++
+		} else {
+			clazz = s.classOf(r)
+		}
+
+		if s.quote {
+			if bpos > 0 && clazz == QUOTE {
+				s.quote = false
+			} else {
+				clazz = QUOTE
+			}
+		} else if clazz == QUOTE {
+			s.quote = true
+		}
+
+		if clazz != s.last {
 			s.last = clazz
 			break
 		}
@@ -82,28 +94,24 @@ func (s *Scanner) splitToken(data []byte, atEOF bool) (int, []byte, error) {
 func NewScanner(r io.Reader) *Scanner {
 	s := bufio.NewScanner(r)
 	scan := &Scanner{
-		s:    s,
+		scan: s,
 		curr: ILLEGAL,
-		last: ILLEGAL,
+		last: SPACE,
 	}
 	s.Split(scan.splitToken)
 	return scan
 }
 
 func (s *Scanner) Text() string {
-	return s.s.Text()
+	return s.scan.Text()
 }
 
 func (s *Scanner) Token() Token {
-	t := s.s.Text()
-	if t == "/*" || t == "*/" {
-		return COMMENT
-	}
 	return s.curr
 }
 
 func (s *Scanner) Scan() bool {
-	return s.s.Scan()
+	return s.scan.Scan()
 }
 
 func main() {
