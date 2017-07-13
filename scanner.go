@@ -14,8 +14,11 @@ const (
 	ILLEGAL Token = iota
 	SPACE
 	STRING
-	OPERATOR
+	COMP
 	TOKEN
+	QUOTE
+	OPERATOR
+	COMMENT
 )
 
 type Scanner struct {
@@ -24,15 +27,21 @@ type Scanner struct {
 	s    *bufio.Scanner
 }
 
-func classOf(r rune) Token {
+func (s *Scanner) classOf(r rune) Token {
 	if r == ' ' || r == '\t' || r == '\r' || r == '\n' {
 		return SPACE
 	}
 	if r == '=' || r == '<' || r == '>' || r == '!' {
+		return COMP
+	}
+	if r == '+' || r == '-' || r == '*' || r == '/' {
 		return OPERATOR
 	}
 	if '0' <= r && r <= '9' || ('a' <= r && r <= 'z') || ('A' <= r && r <= 'A') {
 		return TOKEN
+	}
+	if r == '\'' {
+		return QUOTE
 	}
 	if r == '\'' {
 		return STRING
@@ -53,7 +62,7 @@ func (s *Scanner) splitToken(data []byte, atEOF bool) (int, []byte, error) {
 		if i == 0 {
 			break
 		}
-		clazz := classOf(r)
+		clazz := s.classOf(r)
 		if s.last == ILLEGAL {
 			s.last = clazz
 		} else if clazz != s.last {
@@ -86,6 +95,10 @@ func (s *Scanner) Text() string {
 }
 
 func (s *Scanner) Token() Token {
+	t := s.s.Text()
+	if t == "/*" || t == "*/" {
+		return COMMENT
+	}
 	return s.curr
 }
 
@@ -95,7 +108,7 @@ func (s *Scanner) Scan() bool {
 
 func main() {
 	s := `
-	select * from foo where id = 3
+	select * from foo where id = /*a*/'foo bar'
 	`
 	scan := NewScanner(strings.NewReader(s))
 	for scan.Scan() {
