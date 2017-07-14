@@ -2,16 +2,13 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
-	"strings"
 	"unicode/utf8"
-
-	"github.com/fatih/color"
-	"github.com/mattn/go-colorable"
 )
 
 type Token int
+
+//go:generate stringer -type Token .
 
 const (
 	ILLEGAL Token = iota
@@ -22,6 +19,8 @@ const (
 	QUOTE
 	OPERATOR
 	COMMENT
+	PAREN
+	COMMA
 )
 
 type State int
@@ -43,6 +42,12 @@ func (s *Scanner) classOf(r rune) Token {
 	}
 	if r == '+' || r == '-' || r == '*' || r == '/' {
 		return OPERATOR
+	}
+	if r == ',' {
+		return COMMA
+	}
+	if r == '(' || r == ')' {
+		return PAREN
 	}
 	if '0' <= r && r <= '9' || ('a' <= r && r <= 'z') || ('A' <= r && r <= 'A') {
 		return TOKEN
@@ -128,31 +133,4 @@ func (s *Scanner) Token() Token {
 
 func (s *Scanner) Scan() bool {
 	return s.scan.Scan()
-}
-
-func main() {
-	s := `
-	select * from foo where id = /*a*/'foo bar'
-	`
-
-	out := colorable.NewColorableStdout()
-	scan := NewScanner(strings.NewReader(s))
-	for scan.Scan() {
-		switch scan.Token() {
-		case COMMENT:
-			fmt.Fprint(out, color.BlueString(scan.Text()))
-		case OPERATOR:
-			fmt.Fprint(out, color.MagentaString(scan.Text()))
-		case TOKEN:
-			if scan.InComment() {
-				fmt.Fprint(out, color.YellowString(scan.Text()))
-			} else {
-				fmt.Fprint(out, color.GreenString(scan.Text()))
-			}
-		case QUOTE:
-			fmt.Fprint(out, color.RedString(scan.Text()))
-		default:
-			fmt.Fprint(out, color.WhiteString(scan.Text()))
-		}
-	}
 }

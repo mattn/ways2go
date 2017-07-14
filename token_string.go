@@ -4,9 +4,9 @@ package main
 
 import "fmt"
 
-const _Token_name = "ILLEGALSPACESTRINGCOMPTOKENQUOTEOPERATORCOMMENT"
+const _Token_name = "ILLEGALSPACESTRINGCOMPTOKENQUOTEOPERATORCOMMENTPAREN"
 
-var _Token_index = [...]uint8{0, 7, 12, 18, 22, 27, 32, 40, 47}
+var _Token_index = [...]uint8{0, 7, 12, 18, 22, 27, 32, 40, 47, 52}
 
 func (i Token) String() string {
 	if i < 0 || i >= Token(len(_Token_index)-1) {
