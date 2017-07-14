@@ -1,4 +1,4 @@
-package main
+package go2way
 
 import (
 	"bufio"
