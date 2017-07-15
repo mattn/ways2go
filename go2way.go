@@ -12,11 +12,15 @@ import (
 	"github.com/mattn/kinako/vm"
 )
 
+// NamedSign is behavior of named value for SQL.
 type NamedSign int
 
 const (
+	// Question replace variable name into ?.
 	Question NamedSign = iota
+	// Dollar append $ for variable name.
 	Dollar
+	// Colon also append.
 	Colon
 )
 
@@ -71,6 +75,7 @@ func toBool(v reflect.Value) bool {
 	return false
 }
 
+// Eval evaluate SQL with condition contained env. And replace variable names with sign. This return replaced SQL.
 func Eval(sql string, env map[string]interface{}, sign NamedSign) (string, error) {
 	venv := vm.NewEnv()
 	for k, v := range env {
