@@ -1,10 +1,9 @@
 package go2way
 
 import (
+	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestScanner(t *testing.T) {
@@ -30,7 +29,7 @@ func TestScanner(t *testing.T) {
 				got = append(got, scan.Text())
 			}
 		}
-		if !cmp.Equal(got, tt.want) {
+		if !reflect.DeepEqual(got, tt.want) {
 			t.Fatalf("want %v, but got %v", tt.want, got)
 		}
 	}
