@@ -1,7 +1,8 @@
-package go2way
+package scanner
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"unicode/utf8"
 )
@@ -31,6 +32,7 @@ type Scanner struct {
 	scan    *bufio.Scanner
 	quote   bool
 	comment bool
+	pos     int
 }
 
 func (s *Scanner) classOf(r rune) Token {
@@ -49,7 +51,7 @@ func (s *Scanner) classOf(r rune) Token {
 	if r == '(' || r == ')' {
 		return PAREN
 	}
-	if '0' <= r && r <= '9' || ('a' <= r && r <= 'z') || ('A' <= r && r <= 'A') {
+	if '0' <= r && r <= '9' || ('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z') || r == '.' {
 		return TOKEN
 	}
 	if r == '\'' {
@@ -74,11 +76,16 @@ func (s *Scanner) splitToken(data []byte, atEOF bool) (int, []byte, error) {
 			i++
 		} else {
 			clazz = s.classOf(r)
+			if clazz == ILLEGAL {
+				return bpos, data[:bpos], fmt.Errorf("Illegal token at %v", s.pos)
+			}
 		}
 
 		if s.comment {
-			if bpos == 0 && clazz == COMMENT {
+			if bpos > 0 && clazz == COMMENT {
 				s.comment = false
+			} else {
+				clazz = COMMENT
 			}
 		} else if clazz == COMMENT {
 			s.comment = true
@@ -98,6 +105,7 @@ func (s *Scanner) splitToken(data []byte, atEOF bool) (int, []byte, error) {
 			s.last = clazz
 			break
 		}
+		s.pos += i
 		bpos += i
 		b = b[i:]
 	}
@@ -123,14 +131,14 @@ func (s *Scanner) Text() string {
 	return s.scan.Text()
 }
 
-func (s *Scanner) InComment() bool {
-	return s.comment
-}
-
 func (s *Scanner) Token() Token {
 	return s.curr
 }
 
 func (s *Scanner) Scan() bool {
 	return s.scan.Scan()
+}
+
+func (s *Scanner) Err() error {
+	return s.scan.Err()
 }

@@ -1,4 +1,4 @@
-package go2way
+package scanner
 
 import (
 	"reflect"
@@ -13,11 +13,11 @@ func TestScanner(t *testing.T) {
 	}{
 		{
 			input: `select * from foo where id = /*a*/'foo bar'`,
-			want:  []string{"select", "*", "from", "foo", "where", "id", "=", "/*", "a", "*/", "'foo bar'"},
+			want:  []string{"select", "*", "from", "foo", "where", "id", "=", "/*a*/", "'foo bar'"},
 		},
 		{
 			input: `insert into foo(id, text) values(0, 'foo'/*a*/)`,
-			want:  []string{"insert", "into", "foo", "(", "id", ",", "text", ")", "values", "(", "0", ",", "'foo'", "/*", "a", "*/", ")"},
+			want:  []string{"insert", "into", "foo", "(", "id", ",", "text", ")", "values", "(", "0", ",", "'foo'", "/*a*/", ")"},
 		},
 	}
 
