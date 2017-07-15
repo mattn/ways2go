@@ -23,6 +23,18 @@ func TestGo2way(t *testing.T) {
 			sign:  Question,
 			want:  `insert into foo(id, bar) values(1,?)`,
 		},
+		{
+			query: `insert into foo(id, bar) values(1,/*bar*/'bar')`,
+			input: map[string]interface{}{"true": true},
+			sign:  Dollar,
+			want:  `insert into foo(id, bar) values(1,$bar)`,
+		},
+		{
+			query: `insert into foo(id, bar) values(1,/*bar*/'bar')`,
+			input: map[string]interface{}{"true": true},
+			sign:  Colon,
+			want:  `insert into foo(id, bar) values(1,:bar)`,
+		},
 	}
 
 	for _, tt := range tests {
