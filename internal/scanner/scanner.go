@@ -7,25 +7,35 @@ import (
 	"unicode/utf8"
 )
 
+// Token is type of token.
 type Token int
 
 //go:generate stringer -type Token .
 
 const (
+	// ILLEGAL is
 	ILLEGAL Token = iota
+	// SPACE is
 	SPACE
+	// STRING is
 	STRING
+	// COMP is
 	COMP
+	// TOKEN is
 	TOKEN
+	// QUOTE is
 	QUOTE
+	// OPERATOR is
 	OPERATOR
+	// COMMENT is
 	COMMENT
+	// PAREN is
 	PAREN
+	// COMMA is
 	COMMA
 )
 
-type State int
-
+// Scanner hold informations for bufio.Scanner.
 type Scanner struct {
 	last    Token
 	curr    Token
@@ -116,6 +126,7 @@ func (s *Scanner) splitToken(data []byte, atEOF bool) (int, []byte, error) {
 	return bpos, data[:bpos], err
 }
 
+// NewScanner return new Scanner.
 func NewScanner(r io.Reader) *Scanner {
 	s := bufio.NewScanner(r)
 	scan := &Scanner{
@@ -127,18 +138,22 @@ func NewScanner(r io.Reader) *Scanner {
 	return scan
 }
 
+// Text return text.
 func (s *Scanner) Text() string {
 	return s.scan.Text()
 }
 
+// Token return token.
 func (s *Scanner) Token() Token {
 	return s.curr
 }
 
+// Scan return true when it is possible to scan next.
 func (s *Scanner) Scan() bool {
 	return s.scan.Scan()
 }
 
+// Err return error while scanning.
 func (s *Scanner) Err() error {
 	return s.scan.Err()
 }
