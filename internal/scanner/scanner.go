@@ -86,7 +86,7 @@ func (s *Scanner) splitToken(data []byte, atEOF bool) (int, []byte, error) {
 			i++
 		} else {
 			clazz = s.classOf(r)
-			if clazz == ILLEGAL {
+			if !s.comment && !s.quote && clazz == ILLEGAL {
 				return bpos, data[:bpos], fmt.Errorf("Illegal token at %v", s.pos)
 			}
 		}
