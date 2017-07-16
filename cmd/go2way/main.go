@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -35,18 +36,40 @@ func (e *env) Set(v string) error {
 	return nil
 }
 
+type namedSign go2way.NamedSign
+
+func (s *namedSign) String() string {
+	return go2way.NamedSign(*s).String()
+}
+
+func (s *namedSign) Set(v string) error {
+	switch v {
+	case "?":
+		*s = namedSign(go2way.Question)
+	case ":":
+		*s = namedSign(go2way.Colon)
+	case "$":
+		*s = namedSign(go2way.Dollar)
+	default:
+		return errors.New("invalid named sign")
+	}
+	return nil
+}
+
 func main() {
 	var file string
 	var e env
+	var ns namedSign = namedSign(go2way.Question)
 	flag.StringVar(&file, "f", "", "SQL file")
 	flag.Var(&e, "e", "envs")
+	flag.Var(&ns, "s", "named variable sign")
 	flag.Parse()
 
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal(err)
 	}
-	sql, err := go2way.Eval(string(b), e, go2way.Question)
+	sql, err := go2way.Eval(string(b), e, go2way.NamedSign(ns))
 	if err != nil {
 		log.Fatal(err)
 	}
