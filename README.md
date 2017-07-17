@@ -8,6 +8,12 @@
 
 # Usage
 
+```go
+got, err := Eval(`
+select * from foo where id = /*id*/5 /* IF enabled */and bar = /*bar*/ /*END*/
+`, map[string]{"enabled": true}, ways2go.Question)
+```
+
 # License
 
 MIT
