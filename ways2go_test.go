@@ -35,6 +35,12 @@ func TestEval(t *testing.T) {
 			sign:  Colon,
 			want:  `insert into foo(id, bar) values(1,:bar)`,
 		},
+		{
+			query: `select * from foo where foo = 1 /* IF f() */and bar = 2/*END*/`,
+			input: map[string]interface{}{"f": func() bool { return true }},
+			sign:  Question,
+			want:  `select * from foo where foo = 1 and bar = 2`,
+		},
 	}
 
 	for _, tt := range tests {
