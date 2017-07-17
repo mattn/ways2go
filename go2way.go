@@ -1,4 +1,4 @@
-package go2way
+package ways2go
 
 import (
 	"bytes"
@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mattn/go2way/internal/scanner"
 	"github.com/mattn/kinako/vm"
+	"github.com/mattn/ways2go/internal/scanner"
 )
 
 // NamedSign is behavior of named value for SQL.

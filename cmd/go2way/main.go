@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/mattn/go2way"
+	"github.com/mattn/ways2go"
 )
 
 type env map[string]interface{}
@@ -36,20 +36,20 @@ func (e *env) Set(v string) error {
 	return nil
 }
 
-type namedSign go2way.NamedSign
+type namedSign ways2go.NamedSign
 
 func (s *namedSign) String() string {
-	return go2way.NamedSign(*s).String()
+	return ways2go.NamedSign(*s).String()
 }
 
 func (s *namedSign) Set(v string) error {
 	switch v {
 	case "?":
-		*s = namedSign(go2way.Question)
+		*s = namedSign(ways2go.Question)
 	case ":":
-		*s = namedSign(go2way.Colon)
+		*s = namedSign(ways2go.Colon)
 	case "$":
-		*s = namedSign(go2way.Dollar)
+		*s = namedSign(ways2go.Dollar)
 	default:
 		return errors.New("invalid named sign")
 	}
@@ -59,7 +59,7 @@ func (s *namedSign) Set(v string) error {
 func main() {
 	var file string
 	var e env
-	var ns namedSign = namedSign(go2way.Question)
+	var ns namedSign = namedSign(ways2go.Question)
 	flag.StringVar(&file, "f", "", "SQL file")
 	flag.Var(&e, "e", "envs")
 	flag.Var(&ns, "s", "named variable sign")
@@ -69,7 +69,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sql, err := go2way.Eval(string(b), e, go2way.NamedSign(ns))
+	sql, err := ways2go.Eval(string(b), e, ways2go.NamedSign(ns))
 	if err != nil {
 		log.Fatal(err)
 	}

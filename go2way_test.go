@@ -1,10 +1,10 @@
-package go2way
+package ways2go
 
 import (
 	"testing"
 )
 
-func TestGo2way(t *testing.T) {
+func TestEval(t *testing.T) {
 	tests := []struct {
 		query string
 		input map[string]interface{}
