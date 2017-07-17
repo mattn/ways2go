@@ -12,10 +12,10 @@ func TestEval(t *testing.T) {
 		want  string
 	}{
 		{
-			query: `select * from foo where id = /*id*/0.5 /* IF true */and bar = /*id*/ /*END*/`,
+			query: `select * from foo where foo = /*foo*/0.5 /* IF true */and bar = /*bar*/ /*END*/`,
 			input: map[string]interface{}{"true": true},
-			sign:  Question,
-			want:  `select * from foo where id = ? and bar = ?`,
+			sign:  Colon,
+			want:  `select * from foo where foo = :foo and bar = :bar`,
 		},
 		{
 			query: `insert into foo(id, bar) values(1,/*bar*/'bar')`,
